@@ -1,0 +1,10 @@
+{
+    "sehore_region": {
+        "soil_type": "Medium Black Soil",
+        "pH_level": 7.2,
+        "nitrogen": "Low",
+        "phosphorus": "Medium",
+        "potassium": "High",
+        "moisture_retention": "High"
+    }
+}

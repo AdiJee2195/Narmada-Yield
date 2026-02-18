@@ -1,0 +1,16 @@
+{
+    "soybean": {
+        "optimal_temp_min": 20,
+        "optimal_temp_max": 35,
+        "water_needs": "High",
+        "common_pests": ["Stem Fly", "Tobacco Caterpillar"],
+        "risk_condition": "High Humidity"
+    },
+    "wheat": {
+        "optimal_temp_min": 10,
+        "optimal_temp_max": 25,
+        "water_needs": "Medium",
+        "common_pests": ["Termites", "Aphids"],
+        "risk_condition": "Sudden Temperature Rise"
+    }
+}
