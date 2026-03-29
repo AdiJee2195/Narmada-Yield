@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Narmada Yield Phase II</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"primary-fixed-dim": "#81d99f", "on-error": "#ffffff", "on-secondary-container": "#606551", "on-error-container": "#93000a", "on-tertiary-container": "#bad8ff", "inverse-surface": "#09381f", "primary-fixed": "#9df6b9", "surface-variant": "#bdeec9", tertiary: "#00477a", secondary: "#5c614d", "on-surface": "#00210f", background: "#e9ffec", "on-primary-container": "#90e9ad", "on-tertiary": "#ffffff", "tertiary-fixed-dim": "#9ecaff", "surface-tint": "#046d3e", "secondary-fixed-dim": "#c4c9b1", "secondary-fixed": "#e0e5cc", "surface-container-low": "#d0ffdb", "on-surface-variant": "#3f4941", "on-secondary": "#ffffff", "error-container": "#ffdad6", error: "#ba1a1a", surface: "#e9ffec", "surface-container-highest": "#bdeec9", "on-primary-fixed-variant": "#00522d", "surface-container-high": "#c3f4cf", "on-tertiary-fixed-variant": "#00497d", "on-primary": "#ffffff", "primary-container": "#006b3c", "outline-variant": "#bec9be", "on-primary-fixed": "#00210f", "inverse-on-surface": "#cbfdd7", "tertiary-fixed": "#d1e4ff", primary: "#00502c", "on-secondary-fixed-variant": "#444936", "secondary-container": "#dee2c9", "surface-bright": "#e9ffec", "surface-container-lowest": "#ffffff", "tertiary-container": "#005fa0", "on-background": "#00210f", "on-secondary-fixed": "#191d0e", "surface-dim": "#b5e6c1", "surface-container": "#c8fad4", "inverse-primary": "#81d99f", outline: "#6f7a70", "on-tertiary-fixed": "#001d36"}, fontFamily: {headline: ["Manrope"], body: ["Inter"], label: ["Inter"], display: "Manrope"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            background-color: #f9fbeb;
+            font-family: 'Manrope', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .drop-active { border-color: #00502c !important; opacity: 0.8; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 24px; height: 24px; border: 3px solid #d1d5db; border-top-color: #00502c; border-radius: 50%; animation: spin .6s linear infinite; }
+</style>
+</head>
+<body class="text-on-surface">
+<!-- TopNavBar Cluster -->
+<header class="bg-[#f9fbeb] text-[#173418] font-manrope font-bold tracking-tight fixed top-0 w-full z-50">
+    <div class="flex justify-between items-center w-full px-8 py-4 max-w-full">
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-4xl filled-icon" style="color: #173418;">agriculture</span>
+            <h1 class="text-xl font-black text-[#173418] tracking-tighter">NARMADA-YIELD</h1>
+        </div>
+        <nav class="hidden md:flex gap-8 items-center" id="topNav">
+            <a class="nav-link text-[#173418] border-b-2 border-[#173418] pb-1 transition-all" href="#" data-target="dashboard">Dashboard</a>
+            <a class="nav-link text-[#7a5649] font-medium hover:text-[#173418] transition-colors" href="#" data-target="fields">Fields</a>
+            <a class="nav-link text-[#7a5649] font-medium hover:text-[#173418] transition-colors" href="#" data-target="crops">Crops</a>
+            <a class="text-[#7a5649] font-medium hover:text-[#173418] transition-colors opacity-50 cursor-not-allowed" href="#">Assets</a>
+            <a class="text-[#7a5649] font-medium hover:text-[#173418] transition-colors opacity-50 cursor-not-allowed" href="#">Reports</a>
+        </nav>
+        <div class="flex items-center gap-4">
+            <button class="p-2 rounded-full hover:bg-surface-container-high transition-colors">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <a href="#" class="nav-link h-10 w-10 rounded-full bg-secondary-container flex items-center justify-center hover:opacity-80 transition-all cursor-pointer" data-target="profile">
+                <span class="material-symbols-outlined text-on-secondary-container">account_circle</span>
+            </a>
+        </div>
+    </div>
+    <div class="h-px w-full bg-[#edefe0]"></div>
+</header>
+
+<!-- SideNavBar (Desktop Only) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#edefe0] hidden md:flex flex-col p-4 space-y-2 pt-24" id="sideNav">
+    <div class="mb-8 px-3">
+        <h2 class="font-manrope text-sm font-semibold tracking-wide uppercase text-secondary">North Sector</h2>
+        <p class="text-xs text-secondary opacity-70">Active Season 2024</p>
+    </div>
+    <a class="nav-link flex items-center gap-3 bg-[#ffffff] text-[#173418] rounded-lg p-3 shadow-sm group" href="#" data-target="dashboard">
+        <span class="material-symbols-outlined filled-icon">terrain</span>
+        <span class="font-manrope text-sm font-semibold tracking-wide uppercase">Soil Health</span>
+    </a>
+    <a class="nav-link flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#" data-target="irrigation">
+        <span class="material-symbols-outlined">opacity</span>
+        <span class="font-manrope text-sm font-semibold tracking-wide uppercase">Irrigation</span>
+    </a>
+    <a class="nav-link flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#" data-target="weather">
+        <span class="material-symbols-outlined">wb_sunny</span>
+        <span class="font-manrope text-sm font-semibold tracking-wide uppercase">Weather</span>
+    </a>
+    <a class="nav-link flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#" data-target="pest">
+        <span class="material-symbols-outlined">bug_report</span>
+        <span class="font-manrope text-sm font-semibold tracking-wide uppercase">Pest Control</span>
+    </a>
+    <a class="nav-link flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#" data-target="harvest">
+        <span class="material-symbols-outlined">agriculture</span>
+        <span class="font-manrope text-sm font-semibold tracking-wide uppercase">Harvest</span>
+    </a>
+    <div class="mt-auto pb-4">
+        <button class="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition-all">
+            <span class="material-symbols-outlined">add_circle</span>
+            <span>Add Log</span>
+        </button>
+    </div>
+</aside>
+
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-24 pb-20 px-4 md:px-12 bg-background min-h-screen">
+    
+    <!-- DASHBOARD VIEW -->
+    <div id="view-dashboard" class="page-view block">
+        <!-- Welcome Section -->
+        <section class="mb-10">
+            <h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2" id="greeting-name">Hello, Farmer</h2>
+            <p class="text-secondary font-medium">Narmada Yield Phase II • Helping you grow more, better.</p>
+        </section>
+
+        <!-- Bento Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Section 1: Risk Forecasting (Weather + Risk) -->
+        <div class="lg:col-span-8 bg-surface-container rounded-[2rem] p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-10">
+                <span class="material-symbols-outlined text-[120px]">cloud_sync</span>
+            </div>
+            <div class="flex items-center gap-4 mb-8">
+                <div class="bg-primary-container p-4 rounded-full">
+                    <span class="material-symbols-outlined text-white text-3xl filled-icon">wb_sunny</span>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-primary">Weather &amp; Risk</h3>
+                    <p class="text-secondary">Will my crops be safe today?</p>
+                </div>
+            </div>
+
+            <div class="bg-primary-container text-white p-8 rounded-[1.5rem] shadow-xl">
+                <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined">query_stats</span>
+                    Calculate Disease Risk
+                </h4>
+                <form class="grid grid-cols-1 md:grid-cols-3 gap-6" id="riskForm">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold uppercase tracking-widest opacity-80">Air Temperature</label>
+                        <input class="w-full bg-surface-container-highest/20 border-none rounded-xl text-white placeholder-white/40 p-4 focus:ring-2 focus:ring-primary-fixed" id="risk_temp" placeholder="e.g. 30" type="number" step="0.1"/>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold uppercase tracking-widest opacity-80">Humidity %</label>
+                        <input class="w-full bg-surface-container-highest/20 border-none rounded-xl text-white placeholder-white/40 p-4 focus:ring-2 focus:ring-primary-fixed" id="risk_hum" placeholder="e.g. 70" type="number" step="0.1"/>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold uppercase tracking-widest opacity-80">Rainfall (mm)</label>
+                        <input class="w-full bg-surface-container-highest/20 border-none rounded-xl text-white placeholder-white/40 p-4 focus:ring-2 focus:ring-primary-fixed" id="risk_rain" placeholder="e.g. 15" type="number" step="0.1"/>
+                    </div>
+                    <button id="risk-btn" class="md:col-span-3 bg-primary-fixed text-primary font-black py-4 rounded-xl flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform shadow-lg" onclick="calculateRisk()" type="button">
+                        <span class="material-symbols-outlined filled-icon">calculate</span>
+                        CHECK FOR DANGER
+                    </button>
+                </form>
+
+                <div class="mt-6 hidden p-6 rounded-2xl bg-white/10 flex items-center gap-4 transition-all" id="riskResult">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center" id="riskIndicator">
+                        <span class="material-symbols-outlined text-3xl" id="riskIcon">warning</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold uppercase opacity-60">Result</p>
+                        <p class="text-xl font-black" id="riskText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Diagnostic Vision (Upload Zone) -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-surface-container-highest rounded-[2rem] p-8 h-full border-4 border-dashed border-outline-variant/30 flex flex-col items-center justify-center text-center transition-colors" id="drop-zone">
+                <div class="bg-white p-6 rounded-full mb-6 shadow-md">
+                    <span class="material-symbols-outlined text-6xl text-primary filled-icon">photo_camera</span>
+                </div>
+                <h3 class="text-2xl font-bold text-primary mb-2">Scan Your Plant</h3>
+                <p class="text-secondary mb-8">Take a picture of a leaf to see if it is sick.</p>
+                <label id="upload-label" for="leaf-input" class="cursor-pointer bg-primary text-white w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:opacity-90 shadow-lg border-2 border-transparent transition-all">
+                    <input accept="image/*" class="hidden" id="leaf-input" type="file"/>
+                    <span class="material-symbols-outlined">upload</span>
+                    <span id="drop-label">CHOOSE PHOTO</span>
+                </label>
+                
+                <div id="preview-wrap" class="hidden w-full mt-6">
+                    <img id="preview-img" class="w-full h-32 object-cover rounded-xl shadow-sm" />
+                </div>
+
+                <div class="hidden mt-6 flex items-center gap-3 text-primary font-bold" id="diagnosisLoading">
+                    <span class="material-symbols-outlined animate-spin">sync</span>
+                    Checking leaf health...
+                </div>
+
+                <div class="hidden mt-8 w-full" id="diagnosisResult">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border-t-8 border-green-500 text-left" id="diagnosisBorder">
+                        <span class="material-symbols-outlined text-4xl text-green-500 mb-2" id="diagnosisIcon">check_circle</span>
+                        <p class="text-xs font-bold uppercase tracking-widest text-secondary">Diagnosis</p>
+                        <p class="text-xl font-black text-on-surface mb-2" id="diagnosisText">HEALTHY LEAF</p>
+                        <p class="text-sm text-secondary font-medium" id="treatmentText"></p>
+                    </div>
+                </div>
+                
+                <!-- CTA -->
+                <button id="diag-btn" onclick="submitDiagnosis()" class="hidden mt-4 w-full bg-secondary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90">
+                    <span class="material-symbols-outlined">analytics</span>
+                    Diagnose
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 3: Soil Health Engine (Form) -->
+        <div class="lg:col-span-12 bg-[#ffffff] rounded-[3rem] p-10 shadow-xl relative overflow-hidden mt-2">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
+                <div class="flex items-center gap-4">
+                    <div class="bg-secondary-container p-5 rounded-3xl">
+                        <span class="material-symbols-outlined text-on-secondary-container text-4xl filled-icon">grass</span>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-black text-primary">Soil Health Engine</h3>
+                        <p class="text-secondary font-semibold">Feed your soil the right way.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="px-6 py-3 bg-surface-container rounded-full flex items-center gap-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-xs font-bold uppercase tracking-tighter">Nitrogen (N)</span>
+                    </div>
+                    <div class="px-6 py-3 bg-surface-container rounded-full flex items-center gap-2">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span class="text-xs font-bold uppercase tracking-tighter">Phosphorus (P)</span>
+                    </div>
+                    <div class="px-6 py-3 bg-surface-container rounded-full flex items-center gap-2">
+                        <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                        <span class="text-xs font-bold uppercase tracking-tighter">Potassium (K)</span>
+                    </div>
+                </div>
+            </div>
+
+            <form class="grid grid-cols-1 md:grid-cols-3 gap-8" id="shcForm">
+                <div class="group">
+                    <label class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-secondary mb-3">
+                        <span class="material-symbols-outlined text-green-600">energy_savings_leaf</span>
+                        Nitrogen (kg/ha)
+                    </label>
+                    <input class="w-full bg-surface-container-low border-none rounded-2xl p-5 text-xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 transition-all" id="shc_n" placeholder="0-100" type="number"/>
+                </div>
+                <div class="group">
+                    <label class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-secondary mb-3">
+                        <span class="material-symbols-outlined text-blue-600">water_drop</span>
+                        Phosphorus (kg/ha)
+                    </label>
+                    <input class="w-full bg-surface-container-low border-none rounded-2xl p-5 text-xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 transition-all" id="shc_p" placeholder="0-100" type="number"/>
+                </div>
+                <div class="group">
+                    <label class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-secondary mb-3">
+                        <span class="material-symbols-outlined text-orange-600">flare</span>
+                        Potassium (kg/ha)
+                    </label>
+                    <input class="w-full bg-surface-container-low border-none rounded-2xl p-5 text-xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 transition-all" id="shc_k" placeholder="0-100" type="number"/>
+                </div>
+                <button id="soil-btn" class="md:col-span-3 bg-secondary text-white py-6 rounded-[2rem] font-black text-2xl flex items-center justify-center gap-4 hover:bg-primary transition-colors shadow-2xl group" onclick="calculateFertilizer()" type="button">
+                    <span class="material-symbols-outlined text-4xl group-hover:rotate-12 transition-transform">fork_spoon</span>
+                    GET FERTILIZER PLAN
+                </button>
+            </form>
+
+            <div class="hidden mt-12 p-8 bg-surface-container-low rounded-[2rem] border-l-8 border-secondary transition-all" id="shcResult">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="w-full md:w-1/3">
+                        <p class="text-sm font-black uppercase tracking-widest text-secondary mb-2">Yield Projection</p>
+                        <div class="h-12 w-full bg-white rounded-full p-2 relative">
+                            <div class="h-full bg-primary rounded-full transition-all duration-1000" id="yieldProgress" style="width: 0%"></div>
+                            <span class="absolute right-6 top-1/2 -translate-y-1/2 font-black text-primary">High</span>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-2/3">
+                        <div class="grid grid-cols-3 gap-4 mb-4" id="fertilizerAmounts">
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                                <p class="text-sm font-semibold text-secondary uppercase">Urea</p>
+                                <p class="text-2xl font-black text-primary" id="amount-urea">-</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                                <p class="text-sm font-semibold text-secondary uppercase">DAP</p>
+                                <p class="text-2xl font-black text-primary" id="amount-dap">-</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                                <p class="text-sm font-semibold text-secondary uppercase">MOP</p>
+                                <p class="text-2xl font-black text-primary" id="amount-mop">-</p>
+                            </div>
+                        </div>
+                        <h5 class="text-xl font-black text-primary mb-2">Recommended Strategy</h5>
+                        <p class="text-secondary font-medium text-md leading-relaxed" id="shcText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div> <!-- END VIEW DASHBOARD -->
+
+    <!-- FIELDS VIEW -->
+    <div id="view-fields" class="page-view hidden">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Fields Management</h2>
+            <button class="bg-primary text-white px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">add</span> Add Field</button>
+        </div>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant mb-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-black text-primary">North Sector - Parcel A</h3>
+                <div class="flex gap-2">
+                    <button class="text-secondary hover:text-primary p-2"><span class="material-symbols-outlined text-xl">edit</span></button>
+                    <button class="text-error hover:opacity-80 p-2"><span class="material-symbols-outlined text-xl">delete</span></button>
+                </div>
+            </div>
+            <div class="flex gap-8 mb-6">
+                <div><p class="text-secondary text-sm">Area</p><p class="text-xl font-bold">120 Hectares</p></div>
+                <div><p class="text-secondary text-sm">Soil Type</p><p class="text-xl font-bold">Black Cotton</p></div>
+                <div><p class="text-secondary text-sm">Status</p><p class="text-xl font-bold text-green-600">Active</p></div>
+            </div>
+            <button class="w-full bg-surface-container-high text-primary py-2 rounded-xl font-bold hover:bg-surface-dim transition-colors text-sm">Update Field Stats</button>
+        </div>
+    </div>
+
+    <!-- CROPS VIEW -->
+    <div id="view-crops" class="page-view hidden">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Crop Tracking</h2>
+            <button class="bg-primary text-white px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">add</span> Plant New Crop</button>
+        </div>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant mb-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-black text-primary">Soybean (JS 335)</h3>
+                <div class="flex gap-2">
+                    <button class="text-error hover:opacity-80 p-2" title="Remove Crop"><span class="material-symbols-outlined text-xl">delete</span></button>
+                </div>
+            </div>
+            <div class="flex gap-8 mb-6">
+                <div><p class="text-secondary text-sm">Planted</p><p class="text-xl font-bold">June 15, 2024</p></div>
+                <div><p class="text-secondary text-sm">Current Stage</p><p class="text-xl font-bold">Vegetative (V6)</p></div>
+            </div>
+            <div class="w-full bg-surface-container-high rounded-full h-3"><div class="bg-primary h-3 rounded-full" style="width: 45%;"></div></div>
+            <p class="text-sm text-secondary mt-2 mb-6">45% to maturity</p>
+            <div class="flex gap-4">
+                <button class="flex-1 bg-surface-container-high text-primary py-2 rounded-xl font-bold hover:bg-surface-dim transition-colors text-sm">Update Stats</button>
+                <button class="flex-1 bg-[#173418] text-white py-2 rounded-xl font-bold hover:bg-opacity-90 transition-colors text-sm">Mark as Harvested</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- IRRIGATION VIEW -->
+    <div id="view-irrigation" class="page-view hidden">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Irrigation Schedule</h2>
+            <button class="bg-[#005fa0] text-white px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">add</span> Add Schedule</button>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant">
+                <div class="flex items-center gap-4 mb-4">
+                    <span class="material-symbols-outlined text-4xl text-[#005fa0]">water_drop</span>
+                    <h3 class="text-2xl font-black text-primary">Water Usage</h3>
+                </div>
+                <p class="text-4xl font-black text-primary mb-2">4,200 <span class="text-xl text-secondary">Liters / day</span></p>
+                <p class="text-secondary font-medium mb-6">Next scheduled run: Tomorrow at 06:00 AM</p>
+                <div class="flex gap-4">
+                    <button class="flex-1 bg-[#005fa0] text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-opacity-90">Manual Override</button>
+                    <button class="flex-1 bg-surface-container-high text-[#005fa0] px-6 py-3 rounded-xl font-bold hover:bg-surface-dim">Update Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WEATHER VIEW -->
+    <div id="view-weather" class="page-view hidden">
+        <section class="mb-10"><h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Local Weather</h2></section>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant flex flex-wrap gap-6">
+            <div class="min-w-[150px] bg-surface-container p-6 rounded-2xl flex flex-col items-center">
+                <p class="font-bold mb-2">Today</p><span class="material-symbols-outlined text-5xl text-orange-500 mb-2">sunny</span><p class="text-2xl font-black">30°C</p>
+            </div>
+            <div class="min-w-[150px] bg-white border border-outline-variant p-6 rounded-2xl flex flex-col items-center">
+                <p class="font-bold mb-2">Tomorrow</p><span class="material-symbols-outlined text-5xl text-gray-500 mb-2">cloud</span><p class="text-2xl font-black">28°C</p>
+            </div>
+            <div class="min-w-[150px] bg-white border border-outline-variant p-6 rounded-2xl flex flex-col items-center">
+                <p class="font-bold mb-2">Wed</p><span class="material-symbols-outlined text-5xl text-blue-500 mb-2">rainy</span><p class="text-2xl font-black">25°C</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PEST CONTROL VIEW -->
+    <div id="view-pest" class="page-view hidden">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Pest Control Logs</h2>
+            <button class="bg-primary text-white px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">add</span> Deploy Trap</button>
+        </div>
+        <div id="pest-alerts-container"></div>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant">
+            <h3 class="text-2xl font-black text-primary mb-4">Active Deployments</h3>
+            <ul class="space-y-4">
+                <li class="flex justify-between items-center bg-surface-container-low p-4 rounded-xl group">
+                    <span class="font-bold">Pheromone Trap #1 (East Boundary)</span>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm bg-green-200 text-green-800 px-3 py-1 rounded-full font-bold">Status: Safe</span>
+                        <div class="hidden group-hover:flex gap-2 transition-all">
+                            <button class="text-secondary hover:text-primary"><span class="material-symbols-outlined text-sm">edit</span></button>
+                            <button class="text-error hover:opacity-80"><span class="material-symbols-outlined text-sm">delete</span></button>
+                        </div>
+                    </div>
+                </li>
+                <li class="flex justify-between items-center bg-surface-container-low p-4 rounded-xl group">
+                    <span class="font-bold">Sticky Trap #4 (Center)</span>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm bg-orange-200 text-orange-800 px-3 py-1 rounded-full font-bold">Status: Review</span>
+                        <div class="hidden group-hover:flex gap-2 transition-all">
+                            <button class="text-secondary hover:text-primary"><span class="material-symbols-outlined text-sm">edit</span></button>
+                            <button class="text-error hover:opacity-80"><span class="material-symbols-outlined text-sm">delete</span></button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- HARVEST VIEW -->
+    <div id="view-harvest" class="page-view hidden">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Harvest Planner</h2>
+            <button class="bg-primary text-white px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">add</span> New Projection</button>
+        </div>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant bg-gradient-to-br from-white to-surface-dim mb-6">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="text-2xl font-black text-primary">Estimated Yield (Soybean)</h3>
+                <div class="flex gap-2">
+                    <button class="text-secondary hover:text-primary p-2"><span class="material-symbols-outlined text-xl">edit</span></button>
+                    <button class="text-error hover:opacity-80 p-2" title="Remove Projection"><span class="material-symbols-outlined text-xl">delete</span></button>
+                </div>
+            </div>
+            <p class="text-6xl font-black text-primary mb-6">12.5 <span class="text-2xl text-secondary">Tons/ha</span></p>
+            <div class="bg-white/80 p-4 rounded-xl backdrop-blur-sm inline-block mb-6">
+                <p class="text-sm font-bold text-secondary uppercase tracking-wide">Target Harvest Date</p>
+                <p class="text-xl font-black text-[#173418]">October 20, 2024</p>
+            </div>
+            <div class="flex gap-4">
+                <button class="flex-1 bg-surface-container-high text-primary py-3 rounded-xl font-bold hover:bg-surface-dim transition-colors border border-outline-variant">Update Yield Model</button>
+                <button class="flex-1 bg-[#173418] text-white py-3 rounded-xl font-bold hover:bg-opacity-90 transition-colors shadow-md">Log Final Harvest</button>
+            </div>
+        </div>
+    </div>
+    <!-- PROFILE VIEW -->
+    <div id="view-profile" class="page-view hidden">
+        <section class="mb-10"><h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Farmer Profile</h2></section>
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant max-w-2xl">
+            <div class="flex items-center gap-6 mb-8">
+                <div class="h-20 w-20 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center text-4xl font-bold">
+                    A
+                </div>
+                <div>
+                    <h3 class="text-3xl font-black text-primary" id="profile-name">Advik</h3>
+                    <p class="text-secondary font-medium flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-sm">location_on</span> <span id="profile-location">Kothri Kalan, Madhya Pradesh</span></p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-6 mb-8">
+                <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+                    <p class="text-xs font-bold text-secondary uppercase tracking-wider mb-1">Agro-Climatic Zone</p>
+                    <p class="text-lg font-bold text-on-surface" id="profile-zone">Central India</p>
+                </div>
+                <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+                    <p class="text-xs font-bold text-secondary uppercase tracking-wider mb-1">Active Crops</p>
+                    <div class="flex gap-2 mt-1 flex-wrap" id="profile-crops">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <button id="edit-profile-btn" class="w-full bg-surface-container-high text-primary py-3 rounded-xl font-bold border border-outline-variant hover:bg-surface-dim transition-colors">Edit Profile Information</button>
+        </div>
+    </div>
+
+</main>
+
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-[#f9fbeb] border-t border-[#edefe0] flex justify-around py-4 px-2 z-50">
+    <a class="nav-link flex flex-col items-center gap-1 text-[#173418]" href="#" data-target="dashboard">
+        <span class="material-symbols-outlined filled-icon">dashboard</span>
+        <span class="text-[10px] font-bold uppercase">Main</span>
+    </a>
+    <a class="nav-link flex flex-col items-center gap-1 text-[#7a5649]" href="#" data-target="fields">
+        <span class="material-symbols-outlined">terrain</span>
+        <span class="text-[10px] font-bold uppercase">Fields</span>
+    </a>
+    <a class="nav-link flex flex-col items-center gap-1 text-[#7a5649]" href="#" data-target="irrigation">
+        <span class="material-symbols-outlined">opacity</span>
+        <span class="text-[10px] font-bold uppercase">Water</span>
+    </a>
+    <a class="nav-link flex flex-col items-center gap-1 text-[#7a5649]" href="#" data-target="weather">
+        <span class="material-symbols-outlined">wb_sunny</span>
+        <span class="text-[10px] font-bold uppercase">Weather</span>
+    </a>
+</nav>
+
+<!-- Generic Action Modal overlay -->
+<div id="generic-action-modal" class="fixed inset-0 bg-black/50 z-[110] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 shadow-xl max-w-lg w-full">
+        <h3 id="generic-modal-title" class="text-2xl font-black text-primary mb-6">Action</h3>
+        <div class="space-y-4">
+            <div>
+                <label id="generic-modal-label" class="block text-sm font-bold text-secondary mb-1">Details</label>
+                <input type="text" id="generic-modal-input" class="w-full rounded-xl border-outline-variant focus:border-primary focus:ring-primary shadow-sm text-secondary font-medium">
+                
+                <div id="generic-modal-select-container" class="hidden mt-4">
+                    <p class="text-xs font-bold text-[#173418] mb-2 uppercase tracking-wide">Recommended for <span id="generic-modal-zone-text">your zone</span>:</p>
+                    <div id="generic-modal-recommended-chips" class="flex flex-wrap gap-2 mb-4"></div>
+                    <p class="text-xs font-bold text-secondary mb-2 uppercase tracking-wide">Other available crops:</p>
+                    <div id="generic-modal-other-chips" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-4 mt-8">
+            <button id="cancel-action-btn" class="flex-1 bg-surface-container-high text-primary py-3 rounded-xl font-bold hover:bg-surface-dim transition-colors">Cancel</button>
+            <button id="save-action-btn" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold shadow-md hover:bg-opacity-90 transition-all">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal overlay -->
+<div id="edit-profile-modal" class="fixed inset-0 bg-black/50 z-[100] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 shadow-xl max-w-lg w-full">
+        <h3 class="text-2xl font-black text-primary mb-6">Edit Profile</h3>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-secondary mb-1">Name</label>
+                <input type="text" id="edit-name" class="w-full rounded-xl border-outline-variant focus:border-primary focus:ring-primary shadow-sm text-secondary font-medium">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-secondary mb-1">Location</label>
+                <input type="text" id="edit-location" class="w-full rounded-xl border-outline-variant focus:border-primary focus:ring-primary shadow-sm text-secondary font-medium">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-secondary mb-1">Agro-Climatic Zone</label>
+                <select id="edit-zone" class="w-full rounded-xl border-outline-variant focus:border-primary focus:ring-primary shadow-sm text-secondary font-medium bg-white">
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-secondary mb-1">Active Crops <span class="text-xs font-normal opacity-70">(comma separated)</span></label>
+                <input type="text" id="edit-crops" class="w-full rounded-xl border-outline-variant focus:border-primary focus:ring-primary shadow-sm text-secondary font-medium">
+            </div>
+        </div>
+        <div class="flex gap-4 mt-8">
+            <button id="cancel-edit-btn" class="flex-1 bg-surface-container-high text-primary py-3 rounded-xl font-bold hover:bg-surface-dim transition-colors">Cancel</button>
+            <button id="save-edit-btn" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold shadow-md hover:bg-opacity-90 transition-all">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<script src="agroConfig.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

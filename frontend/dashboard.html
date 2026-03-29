@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Narmada Yield Phase II</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"primary-fixed-dim": "#81d99f", "on-error": "#ffffff", "on-secondary-container": "#606551", "on-error-container": "#93000a", "on-tertiary-container": "#bad8ff", "inverse-surface": "#09381f", "primary-fixed": "#9df6b9", "surface-variant": "#bdeec9", tertiary: "#00477a", secondary: "#5c614d", "on-surface": "#00210f", background: "#e9ffec", "on-primary-container": "#90e9ad", "on-tertiary": "#ffffff", "tertiary-fixed-dim": "#9ecaff", "surface-tint": "#046d3e", "secondary-fixed-dim": "#c4c9b1", "secondary-fixed": "#e0e5cc", "surface-container-low": "#d0ffdb", "on-surface-variant": "#3f4941", "on-secondary": "#ffffff", "error-container": "#ffdad6", error: "#ba1a1a", surface: "#e9ffec", "surface-container-highest": "#bdeec9", "on-primary-fixed-variant": "#00522d", "surface-container-high": "#c3f4cf", "on-tertiary-fixed-variant": "#00497d", "on-primary": "#ffffff", "primary-container": "#006b3c", "outline-variant": "#bec9be", "on-primary-fixed": "#00210f", "inverse-on-surface": "#cbfdd7", "tertiary-fixed": "#d1e4ff", primary: "#00502c", "on-secondary-fixed-variant": "#444936", "secondary-container": "#dee2c9", "surface-bright": "#e9ffec", "surface-container-lowest": "#ffffff", "tertiary-container": "#005fa0", "on-background": "#00210f", "on-secondary-fixed": "#191d0e", "surface-dim": "#b5e6c1", "surface-container": "#c8fad4", "inverse-primary": "#81d99f", outline: "#6f7a70", "on-tertiary-fixed": "#001d36"}, fontFamily: {headline: ["Manrope"], body: ["Inter"], label: ["Inter"], display: "Manrope"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            background-color: #f9fbeb;
+            font-family: 'Manrope', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- TopNavBar Cluster -->
+<header class="bg-[#f9fbeb] text-[#173418] font-manrope font-bold tracking-tight fixed top-0 w-full z-50">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-4xl filled-icon" style="color: #173418;">agriculture</span>
+<h1 class="text-xl font-black text-[#173418] tracking-tighter">Estate Manager</h1>
+</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-[#173418] border-b-2 border-[#173418] pb-1 transition-all" href="#">Dashboard</a>
+<a class="text-[#7a5649] font-medium hover:text-[#173418] transition-colors" href="#">Fields</a>
+<a class="text-[#7a5649] font-medium hover:text-[#173418] transition-colors" href="#">Crops</a>
+<a class="text-[#7a5649] font-medium hover:text-[#173418] transition-colors" href="#">Assets</a>
+<a class="text-[#7a5649] font-medium hover:text-[#173418] transition-colors" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">account_circle</span>
+</div>
+</div>
+</div>
+<div class="h-px w-full bg-[#edefe0]"></div>
+</header>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#edefe0] hidden md:flex flex-col p-4 space-y-2 pt-24">
+<div class="mb-8 px-3">
+<h2 class="font-manrope text-sm font-semibold tracking-wide uppercase text-secondary">North Sector</h2>
+<p class="text-xs text-secondary opacity-70">Active Season 2024</p>
+</div>
+<a class="flex items-center gap-3 bg-[#ffffff] text-[#173418] rounded-lg p-3 shadow-sm group" href="#">
+<span class="material-symbols-outlined filled-icon">terrain</span>
+<span class="font-manrope text-sm font-semibold tracking-wide uppercase">Soil Health</span>
+</a>
+<a class="flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">opacity</span>
+<span class="font-manrope text-sm font-semibold tracking-wide uppercase">Irrigation</span>
+</a>
+<a class="flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">wb_sunny</span>
+<span class="font-manrope text-sm font-semibold tracking-wide uppercase">Weather</span>
+</a>
+<a class="flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">bug_report</span>
+<span class="font-manrope text-sm font-semibold tracking-wide uppercase">Pest Control</span>
+</a>
+<a class="flex items-center gap-3 text-[#7a5649] p-3 hover:bg-[#e2e4d5] transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">agriculture</span>
+<span class="font-manrope text-sm font-semibold tracking-wide uppercase">Harvest</span>
+</a>
+<div class="mt-auto pb-4">
+<button class="w-full bg-primary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition-all">
+<span class="material-symbols-outlined">add_circle</span>
+<span>Add Log</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-24 pb-20 px-4 md:px-12 bg-background min-h-screen">
+<!-- Welcome Section -->
+<section class="mb-10">
+<h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Hello, Farmer</h2>
+<p class="text-secondary font-medium">Narmada Yield Phase II • Helping you grow more, better.</p>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Section 1: Risk Forecasting (Weather + Risk) -->
+<div class="lg:col-span-8 bg-surface-container rounded-[2rem] p-8 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-8 opacity-10">
+<span class="material-symbols-outlined text-[120px]">cloud_sync</span>
+</div>
+<div class="flex items-center gap-4 mb-8">
+<div class="bg-primary-container p-4 rounded-full">
+<span class="material-symbols-outlined text-white text-3xl filled-icon">wb_sunny</span>
+</div>
+<div>
+<h3 class="text-2xl font-bold text-primary">Weather &amp; Risk</h3>
+<p class="text-secondary">Will my crops be safe today?</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Visual Status: Temperature -->
+<div class="bg-white p-6 rounded-3xl shadow-sm flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-orange-500 text-5xl mb-2">device_thermostat</span>
+<span class="text-3xl font-black">32°C</span>
+<span class="text-sm font-bold uppercase tracking-widest text-secondary mt-1">Warm Day</span>
+<div class="w-full h-2 bg-gray-100 rounded-full mt-4">
+<div class="h-full bg-orange-500 rounded-full w-[70%]"></div>
+</div>
+</div>
+<!-- Visual Status: Humidity -->
+<div class="bg-white p-6 rounded-3xl shadow-sm flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-blue-500 text-5xl mb-2">humidity_percentage</span>
+<span class="text-3xl font-black">65%</span>
+<span class="text-sm font-bold uppercase tracking-widest text-secondary mt-1">Good Air</span>
+<div class="w-full h-2 bg-gray-100 rounded-full mt-4">
+<div class="h-full bg-blue-500 rounded-full w-[65%]"></div>
+</div>
+</div>
+<!-- Visual Status: Rain -->
+<div class="bg-white p-6 rounded-3xl shadow-sm flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary text-5xl mb-2">umbrella</span>
+<span class="text-3xl font-black">No Rain</span>
+<span class="text-sm font-bold uppercase tracking-widest text-secondary mt-1">Dry Field</span>
+<div class="w-full h-2 bg-gray-100 rounded-full mt-4">
+<div class="h-full bg-green-500 rounded-full w-[10%]"></div>
+</div>
+</div>
+</div>
+<div class="bg-primary-container text-white p-8 rounded-[1.5rem] shadow-xl">
+<h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">query_stats</span>
+                        Calculate Disease Risk
+                    </h4>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-6" id="riskForm">
+<div class="space-y-2">
+<label class="block text-sm font-bold uppercase tracking-widest opacity-80">Air Temperature</label>
+<input class="w-full bg-surface-container-highest/20 border-none rounded-xl text-white placeholder-white/40 p-4 focus:ring-2 focus:ring-primary-fixed" id="risk_temp" placeholder="e.g. 30" type="number"/>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-bold uppercase tracking-widest opacity-80">Humidity %</label>
+<input class="w-full bg-surface-container-highest/20 border-none rounded-xl text-white placeholder-white/40 p-4 focus:ring-2 focus:ring-primary-fixed" id="risk_hum" placeholder="e.g. 70" type="number"/>
+</div>
+<button class="md:col-span-2 bg-primary-fixed text-primary font-black py-4 rounded-xl flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform shadow-lg" onclick="predictRisk()" type="button">
+<span class="material-symbols-outlined filled-icon">calculate</span>
+                            CHECK FOR DANGER
+                        </button>
+</form>
+<div class="mt-6 hidden p-6 rounded-2xl bg-white/10 flex items-center gap-4" id="riskResult">
+<div class="w-12 h-12 rounded-full flex items-center justify-center" id="riskIndicator">
+<span class="material-symbols-outlined text-3xl">warning</span>
+</div>
+<div>
+<p class="text-sm font-bold uppercase opacity-60">Result</p>
+<p class="text-xl font-black" id="riskText"></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2: Diagnostic Vision (Upload Zone) -->
+<div class="lg:col-span-4 space-y-6">
+<div class="bg-surface-container-highest rounded-[2rem] p-8 h-full border-4 border-dashed border-outline-variant/30 flex flex-col items-center justify-center text-center">
+<div class="bg-white p-6 rounded-full mb-6 shadow-md">
+<span class="material-symbols-outlined text-6xl text-primary filled-icon">photo_camera</span>
+</div>
+<h3 class="text-2xl font-bold text-primary mb-2">Scan Your Plant</h3>
+<p class="text-secondary mb-8">Take a picture of a leaf to see if it is sick.</p>
+<label class="cursor-pointer bg-primary text-white w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:opacity-90 shadow-lg">
+<input accept="image/*" class="hidden" id="leafImage" onchange="diagnoseLeaf()" type="file"/>
+<span class="material-symbols-outlined">upload</span>
+                        CHOOSE PHOTO
+                    </label>
+<div class="hidden mt-6 animate-pulse flex items-center gap-3 text-primary font-bold" id="diagnosisLoading">
+<span class="material-symbols-outlined animate-spin">sync</span>
+                        Checking leaf health...
+                    </div>
+<div class="hidden mt-8 w-full" id="diagnosisResult">
+<div class="bg-white p-6 rounded-3xl shadow-sm border-t-8 border-green-500" id="diagnosisBorder">
+<span class="material-symbols-outlined text-4xl text-green-500 mb-2" id="diagnosisIcon">check_circle</span>
+<p class="text-xs font-bold uppercase tracking-widest text-secondary">Diagnosis</p>
+<p class="text-xl font-black text-on-surface" id="diagnosisText">HEALTHY LEAF</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 3: Soil Health Engine (Form) -->
+<div class="lg:col-span-12 bg-[#ffffff] rounded-[3rem] p-10 shadow-xl relative overflow-hidden">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
+<div class="flex items-center gap-4">
+<div class="bg-secondary-container p-5 rounded-3xl">
+<span class="material-symbols-outlined text-on-secondary-container text-4xl filled-icon">grass</span>
+</div>
+<div>
+<h3 class="text-3xl font-black text-primary">Soil Health Engine</h3>
+<p class="text-secondary font-semibold">Feed your soil the right way.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="px-6 py-3 bg-surface-container rounded-full flex items-center gap-2">
+<div class="w-3 h-3 bg-green-500 rounded-full"></div>
+<span class="text-xs font-bold uppercase tracking-tighter">Nitrogen (N)</span>
+</div>
+<div class="px-6 py-3 bg-surface-container rounded-full flex items-center gap-2">
+<div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+<span class="text-xs font-bold uppercase tracking-tighter">Phosphorus (P)</span>
+</div>
+<div class="px-6 py-3 bg-surface-container rounded-full flex items-center gap-2">
+<div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+<span class="text-xs font-bold uppercase tracking-tighter">Potassium (K)</span>
+</div>
+</div>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-3 gap-8" id="shcForm">
+<div class="group">
+<label class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-secondary mb-3">
+<span class="material-symbols-outlined text-green-600">energy_savings_leaf</span>
+                            Nitrogen Level
+                        </label>
+<input class="w-full bg-surface-container-low border-none rounded-2xl p-5 text-xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 transition-all" id="shc_n" placeholder="0-100" type="number"/>
+</div>
+<div class="group">
+<label class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-secondary mb-3">
+<span class="material-symbols-outlined text-blue-600">water_drop</span>
+                            Phosphorus Level
+                        </label>
+<input class="w-full bg-surface-container-low border-none rounded-2xl p-5 text-xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 transition-all" id="shc_p" placeholder="0-100" type="number"/>
+</div>
+<div class="group">
+<label class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-secondary mb-3">
+<span class="material-symbols-outlined text-orange-600">flare</span>
+                            Potassium Level
+                        </label>
+<input class="w-full bg-surface-container-low border-none rounded-2xl p-5 text-xl font-bold focus:bg-white focus:ring-4 focus:ring-primary/10 transition-all" id="shc_k" placeholder="0-100" type="number"/>
+</div>
+<button class="md:col-span-3 bg-secondary text-white py-6 rounded-[2rem] font-black text-2xl flex items-center justify-center gap-4 hover:bg-primary transition-colors shadow-2xl group" onclick="calculateFertilizer()" type="button">
+<span class="material-symbols-outlined text-4xl group-hover:rotate-12 transition-transform">fork_spoon</span>
+                        GET FERTILIZER PLAN
+                    </button>
+</form>
+<div class="hidden mt-12 p-8 bg-surface-container-low rounded-[2rem] border-l-8 border-secondary" id="shcResult">
+<div class="flex flex-col md:flex-row items-center gap-8">
+<div class="w-full md:w-1/3">
+<p class="text-sm font-black uppercase tracking-widest text-secondary mb-2">Yield Projection</p>
+<div class="h-12 w-full bg-white rounded-full p-2 relative">
+<div class="h-full bg-primary rounded-full transition-all duration-1000" id="yieldProgress" style="width: 75%"></div>
+<span class="absolute right-6 top-1/2 -translate-y-1/2 font-black text-primary">High</span>
+</div>
+</div>
+<div class="w-full md:w-2/3">
+<h5 class="text-2xl font-black text-primary mb-2">Recommended Strategy</h5>
+<p class="text-secondary font-medium text-lg leading-relaxed" id="shcText"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-[#f9fbeb] border-t border-[#edefe0] flex justify-around py-4 px-2 z-50">
+<a class="flex flex-col items-center gap-1 text-[#173418]" href="#">
+<span class="material-symbols-outlined filled-icon">dashboard</span>
+<span class="text-[10px] font-bold uppercase">Main</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#7a5649]" href="#">
+<span class="material-symbols-outlined">terrain</span>
+<span class="text-[10px] font-bold uppercase">Soil</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#7a5649]" href="#">
+<span class="material-symbols-outlined">opacity</span>
+<span class="text-[10px] font-bold uppercase">Water</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#7a5649]" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-bold uppercase">User</span>
+</a>
+</nav>
+<script>
+        async function predictRisk() {
+            const temp = document.getElementById('risk_temp').value;
+            const hum = document.getElementById('risk_hum').value;
+            const resultDiv = document.getElementById('riskResult');
+            const riskIndicator = document.getElementById('riskIndicator');
+            const riskText = document.getElementById('riskText');
+
+            if (!temp || !hum) return alert('Please enter both numbers!');
+
+            try {
+                const response = await fetch('http://localhost:5000/predict_risk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ temperature: temp, humidity: hum })
+                });
+                const data = await response.json();
+                
+                resultDiv.classList.remove('hidden');
+                riskText.innerText = data.risk;
+
+                if (data.risk.toLowerCase().includes('high') || data.risk.toLowerCase().includes('danger')) {
+                    riskIndicator.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-error text-white';
+                } else if (data.risk.toLowerCase().includes('moderate') || data.risk.toLowerCase().includes('caution')) {
+                    riskIndicator.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-tertiary-container text-on-tertiary-container';
+                } else {
+                    riskIndicator.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-green-500 text-white';
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error connecting to server. Ensure local server is running.");
+            }
+        }
+
+        async function diagnoseLeaf() {
+            const fileInput = document.getElementById('leafImage');
+            const loading = document.getElementById('diagnosisLoading');
+            const result = document.getElementById('diagnosisResult');
+            const text = document.getElementById('diagnosisText');
+            const icon = document.getElementById('diagnosisIcon');
+            const border = document.getElementById('diagnosisBorder');
+
+            if (!fileInput.files[0]) return;
+
+            loading.classList.remove('hidden');
+            result.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('http://localhost:5000/diagnose', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                loading.classList.add('hidden');
+                result.classList.remove('hidden');
+                text.innerText = data.diagnosis.toUpperCase();
+
+                if (data.diagnosis.toLowerCase().includes('healthy')) {
+                    icon.innerText = 'check_circle';
+                    icon.className = 'material-symbols-outlined text-4xl text-green-500 mb-2';
+                    border.className = 'bg-white p-6 rounded-3xl shadow-sm border-t-8 border-green-500';
+                } else {
+                    icon.innerText = 'warning';
+                    icon.className = 'material-symbols-outlined text-4xl text-error mb-2';
+                    border.className = 'bg-white p-6 rounded-3xl shadow-sm border-t-8 border-error';
+                }
+            } catch (e) {
+                loading.classList.add('hidden');
+                alert("Error processing image.");
+            }
+        }
+
+        async function calculateFertilizer() {
+            const n = document.getElementById('shc_n').value;
+            const p = document.getElementById('shc_p').value;
+            const k = document.getElementById('shc_k').value;
+            const resultDiv = document.getElementById('shcResult');
+            const text = document.getElementById('shcText');
+            const progress = document.getElementById('yieldProgress');
+
+            if (!n || !p || !k) return alert('Fill in all soil levels!');
+
+            try {
+                const response = await fetch('http://localhost:5000/shc', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ n, p, k })
+                });
+                const data = await response.json();
+                
+                resultDiv.classList.remove('hidden');
+                text.innerText = data.recommendation || "Maintain current organic compost cycle. Monitor moisture weekly.";
+                
+                // Visual metaphor for yield projection
+                const randomYield = Math.floor(Math.random() * 40) + 60; // Mocked for visual effect
+                progress.style.width = `${randomYield}%`;
+            } catch (e) {
+                alert("Error fetching fertilizer advice.");
+            }
+        }
+    </script>
+</body></html>
