@@ -8,6 +8,9 @@ import uuid
 import sqlite3
 import joblib
 import numpy as np
+import io
+import PIL.Image
+import tensorflow as tf
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -30,6 +33,29 @@ try:
         app.logger.warning("ML Model files not found. Predict route may fail.")
 except Exception as e:
     app.logger.error(f"Error loading ML models: {e}")
+
+CV_MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'cv_disease_model.h5')
+cv_model = None
+
+try:
+    if os.path.exists(CV_MODEL_PATH):
+        cv_model = tf.keras.models.load_model(CV_MODEL_PATH)
+        app.logger.info("Successfully loaded Computer Vision Disease model.")
+    else:
+        app.logger.warning("CV Model file not found. Diagnose route may fail.")
+except Exception as e:
+    app.logger.error(f"Error loading CV model: {e}")
+
+TREATMENT_DB = {
+    "Soybean Rust": {
+        "Malwa Plateau": "Apply Hexaconazole 5% SC.",
+        "default": "Apply standard fungicide."
+    },
+    "Wheat Leaf Rust": {
+        "Vindhyan Plateau": "Apply Propiconazole 25% EC.",
+        "default": "Apply Triazole-based fungicide."
+    }
+}
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'narmada_yield.db')
 
@@ -262,15 +288,11 @@ def predict_risk():
 # ---------------------------------------------------------------------------
 @app.route('/diagnose', methods=['POST'])
 def diagnose():
-    """
-    Expected multipart/form-data:
-        file: <image file>
-    """
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in the request. Use key 'file'."}), 400
+        if 'image' not in request.files:
+            return jsonify({"error": "No file part in the request. Use key 'image'."}), 400
 
-        file = request.files['file']
+        file = request.files['image']
 
         if file.filename == '':
             return jsonify({"error": "No file selected."}), 400
@@ -280,29 +302,44 @@ def diagnose():
                 "error": f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
             }), 415
 
-        # Save temporarily with a unique name to avoid collisions
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        temp_filename = f"{uuid.uuid4().hex}.{ext}"
-        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], temp_filename)
-        file.save(temp_path)
+        zone = request.form.get('zone', 'Malwa Plateau')
 
-        # --- Dummy diagnosis logic ---
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT zone_name FROM Agro_Climatic_Zones WHERE zone_name = 'Malwa Plateau' LIMIT 1")
-        row = cursor.fetchone()
-        zone_name = row['zone_name'] if row else "Unknown Zone"
-        conn.close()
+        # Crucial Preprocessing
+        img = PIL.Image.open(io.BytesIO(file.read())).convert('RGB')
+        img = img.resize((224, 224))
+        img_array = np.array(img) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
-        response = {
-            "detected": "Wheat Leaf Rust", 
-            "treatment": f"Apply Propiconazole (Zone: {zone_name})"
-        }
+        if cv_model is None:
+            return jsonify({"error": "Computer Vision model not initialized. Check server logs."}), 500
 
-        # Optionally clean up temp file after responding (keep for now for debugging)
-        # os.remove(temp_path)
+        # Run Inference
+        preds = cv_model.predict(img_array)
+        class_idx = int(np.argmax(preds, axis=-1)[0])
+        confidence = float(np.max(preds)) * 100
 
-        return jsonify(response), 200
+        classes = ["Healthy", "Soybean Rust", "Wheat Leaf Rust"]
+        disease = classes[class_idx]
+
+        if disease == "Healthy":
+            return jsonify({
+                "status": "success", 
+                "alert_level": "success", 
+                "disease": "Healthy", 
+                "confidence": confidence, 
+                "treatment": "No threats detected."
+            }), 200
+
+        # Lookup treatment in TREATMENT_DB based on zone fallback
+        treatment_strategy = TREATMENT_DB.get(disease, {}).get(zone, TREATMENT_DB.get(disease, {}).get('default', 'Consult an agronomist.'))
+
+        return jsonify({
+            "status": "success", 
+            "alert_level": "danger", 
+            "disease": disease, 
+            "confidence": confidence, 
+            "treatment": treatment_strategy
+        }), 200
 
     except Exception as e:
         app.logger.error(f"/diagnose error: {e}")

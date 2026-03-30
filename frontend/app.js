@@ -61,6 +61,33 @@ window.syncUI = function() {
     // 4. Greeting string
     const greeting = document.getElementById("greeting-name");
     if(greeting) greeting.innerText = window.AppState.name ? `Farmer Profile Sync — ${window.AppState.name}` : `Farmer Profile Sync`;
+    
+    // 5. Update UI Dates Globally Stringently
+    const today = new Date();
+    const formattedToday = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    
+    // Set typical harvest target roughly 3 months out
+    const harvestDate = new Date();
+    harvestDate.setMonth(harvestDate.getMonth() + 3);
+    const formattedHarvest = harvestDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    if(document.getElementById("crop-date")) document.getElementById("crop-date").innerText = formattedToday;
+    if(document.getElementById("harvest-date")) document.getElementById("harvest-date").innerText = formattedHarvest;
+
+    // 6. Sync Sub-Routing UI Elements Globally
+    const localZStr = window.AppState.zone && window.AppState.zone.trim() !== "" ? window.AppState.zone : "Central India";
+    const localCStr = window.AppState.crop && window.AppState.crop.trim() !== "" ? window.AppState.crop : "Mixed Farming";
+
+    if(document.getElementById("field-zone")) document.getElementById("field-zone").innerText = `Sector A - ${localZStr}`;
+    if(document.getElementById("crop-name")) document.getElementById("crop-name").innerText = `${localCStr} (Active)`;
+    if(document.getElementById("harvest-crop")) document.getElementById("harvest-crop").innerText = localCStr;
+    
+    // 7. Render Custom Profile Tab Displays
+    if(document.getElementById("display-profile-name")) {
+        document.getElementById("display-profile-name").innerText = window.AppState.name || "Farmer";
+        document.getElementById("display-profile-zone").innerText = localZStr;
+        document.getElementById("display-profile-crops").innerHTML = `<span class="bg-surface-dim px-3 py-1 rounded-full text-sm font-bold text-primary">${localCStr}</span>`;
+    }
 }
 
 // ══════════════════════════════════════════════
@@ -256,7 +283,7 @@ let selectedFile = null;
 (function initDragDrop() {
   const zone = document.getElementById("drop-zone");
   const labelWrapper = document.getElementById("upload-label");
-  const input = document.getElementById("leaf-input");
+  const input = document.getElementById("leaf-upload");
   const label = document.getElementById("drop-label");
   const preview = document.getElementById("preview-wrap");
   const img = document.getElementById("preview-img");
@@ -320,7 +347,8 @@ async function submitDiagnosis() {
   resultDiv.classList.add("hidden");
 
   const form = new FormData();
-  form.append("file", selectedFile);
+  form.append("image", selectedFile);
+  form.append("zone", window.AppState?.zone || "Malwa Plateau");
 
   try {
     const res = await fetch(`${API_BASE}/diagnose`, {
@@ -338,10 +366,12 @@ async function submitDiagnosis() {
     loading.classList.add("hidden");
     resultDiv.classList.remove("hidden");
     
-    text.innerText = (data.detected || data.diagnosis || "Unknown").toUpperCase();
+    const diseaseName = data.disease || "Unknown";
+    const confStr = data.confidence ? ` (${data.confidence.toFixed(1)}%)` : "";
+    text.innerText = (diseaseName + confStr).toUpperCase();
     treatmentText.innerHTML = `<strong>Treatment:</strong> ${data.treatment || "Consult an agronomist."}`;
 
-    if (text.innerText.includes("HEALTHY")) {
+    if (data.alert_level === "success" || diseaseName === "Healthy") {
       icon.innerText = 'check_circle';
       icon.className = 'material-symbols-outlined text-4xl text-green-500 mb-2';
       border.className = 'bg-white p-6 rounded-3xl shadow-sm border-t-8 border-green-500 text-left';
@@ -704,3 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Extraneous bindings removed.
+document.addEventListener('DOMContentLoaded', () => {
+    window.syncUI();
+});

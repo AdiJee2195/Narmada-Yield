@@ -240,8 +240,8 @@
                 </div>
                 <h3 class="text-2xl font-bold text-primary mb-2">Scan Your Plant</h3>
                 <p class="text-secondary mb-8">Take a picture of a leaf to see if it is sick.</p>
-                <label id="upload-label" for="leaf-input" class="cursor-pointer bg-primary text-white w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:opacity-90 shadow-lg border-2 border-transparent transition-all">
-                    <input accept="image/*" class="hidden" id="leaf-input" type="file"/>
+                <label id="upload-label" for="leaf-upload" class="cursor-pointer bg-primary text-white w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:opacity-90 shadow-lg border-2 border-transparent transition-all">
+                    <input accept="image/*" class="hidden" id="leaf-upload" type="file"/>
                     <span class="material-symbols-outlined">upload</span>
                     <span id="drop-label">CHOOSE PHOTO</span>
                 </label>
@@ -267,7 +267,7 @@
                 <!-- CTA -->
                 <button id="diag-btn" onclick="submitDiagnosis()" class="hidden mt-4 w-full bg-secondary text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90">
                     <span class="material-symbols-outlined">analytics</span>
-                    Diagnose
+                    Analyze Leaf
                 </button>
             </div>
         </div>
@@ -369,7 +369,7 @@
         </div>
         <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant mb-6">
             <div class="flex justify-between items-start mb-4">
-                <h3 class="text-2xl font-black text-primary">North Sector - Parcel A</h3>
+                <h3 class="text-2xl font-black text-primary" id="field-zone">North Sector - Parcel A</h3>
                 <div class="flex gap-2">
                     <button class="text-secondary hover:text-primary p-2"><span class="material-symbols-outlined text-xl">edit</span></button>
                     <button class="text-error hover:opacity-80 p-2"><span class="material-symbols-outlined text-xl">delete</span></button>
@@ -392,13 +392,13 @@
         </div>
         <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant mb-6">
             <div class="flex justify-between items-start mb-4">
-                <h3 class="text-2xl font-black text-primary">Soybean (JS 335)</h3>
+                <h3 class="text-2xl font-black text-primary" id="crop-name">Soybean (JS 335)</h3>
                 <div class="flex gap-2">
                     <button class="text-error hover:opacity-80 p-2" title="Remove Crop"><span class="material-symbols-outlined text-xl">delete</span></button>
                 </div>
             </div>
             <div class="flex gap-8 mb-6">
-                <div><p class="text-secondary text-sm">Planted</p><p class="text-xl font-bold">June 15, 2024</p></div>
+                <div><p class="text-secondary text-sm">Planted</p><p class="text-xl font-bold" id="crop-date">June 15, 2024</p></div>
                 <div><p class="text-secondary text-sm">Current Stage</p><p class="text-xl font-bold">Vegetative (V6)</p></div>
             </div>
             <div class="w-full bg-surface-container-high rounded-full h-3"><div class="bg-primary h-3 rounded-full" style="width: 45%;"></div></div>
@@ -490,7 +490,7 @@
         </div>
         <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant bg-gradient-to-br from-white to-surface-dim mb-6">
             <div class="flex justify-between items-start mb-2">
-                <h3 class="text-2xl font-black text-primary">Estimated Yield (Soybean)</h3>
+                <h3 class="text-2xl font-black text-primary">Estimated Yield (<span id="harvest-crop">Soybean</span>)</h3>
                 <div class="flex gap-2">
                     <button class="text-secondary hover:text-primary p-2"><span class="material-symbols-outlined text-xl">edit</span></button>
                     <button class="text-error hover:opacity-80 p-2" title="Remove Projection"><span class="material-symbols-outlined text-xl">delete</span></button>
@@ -499,7 +499,7 @@
             <p class="text-6xl font-black text-primary mb-6">12.5 <span class="text-2xl text-secondary">Tons/ha</span></p>
             <div class="bg-white/80 p-4 rounded-xl backdrop-blur-sm inline-block mb-6">
                 <p class="text-sm font-bold text-secondary uppercase tracking-wide">Target Harvest Date</p>
-                <p class="text-xl font-black text-[#173418]">October 20, 2024</p>
+                <p class="text-xl font-black text-[#173418]" id="harvest-date">October 20, 2024</p>
             </div>
             <div class="flex gap-4">
                 <button class="flex-1 bg-surface-container-high text-primary py-3 rounded-xl font-bold hover:bg-surface-dim transition-colors border border-outline-variant">Update Yield Model</button>
@@ -516,19 +516,19 @@
                     A
                 </div>
                 <div>
-                    <h3 class="text-3xl font-black text-primary" id="profile-name">Advik</h3>
-                    <p class="text-secondary font-medium flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-sm">location_on</span> <span id="profile-location">Kothri Kalan, Madhya Pradesh</span></p>
+                    <h3 class="text-3xl font-black text-primary" id="display-profile-name">Advik</h3>
+                    <p class="text-secondary font-medium flex items-center gap-1 mt-1"><span class="material-symbols-outlined text-sm">location_on</span> <span id="profile-location">Madhya Pradesh</span></p>
                 </div>
             </div>
             
             <div class="grid grid-cols-2 gap-6 mb-8">
                 <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant">
                     <p class="text-xs font-bold text-secondary uppercase tracking-wider mb-1">Agro-Climatic Zone</p>
-                    <p class="text-lg font-bold text-on-surface" id="profile-zone">Central India</p>
+                    <p class="text-lg font-bold text-on-surface" id="display-profile-zone">Central India</p>
                 </div>
                 <div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant">
                     <p class="text-xs font-bold text-secondary uppercase tracking-wider mb-1">Active Crops</p>
-                    <div class="flex gap-2 mt-1 flex-wrap" id="profile-crops">
+                    <div class="flex gap-2 mt-1 flex-wrap" id="display-profile-crops">
                         <!-- Populated by JS -->
                     </div>
                 </div>

@@ -4,3 +4,5 @@ Werkzeug>=3.0.0
 joblib
 scikit-learn
 numpy
+tensorflow
+Pillow
