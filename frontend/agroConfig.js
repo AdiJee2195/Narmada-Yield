@@ -1,20 +1,24 @@
 // frontend/agroConfig.js
 const agroZones = {
-    "Chhattisgarh Plains": ["Rice", "Wheat"],
-    "Northern Hill Region of Chhattisgarh": ["Rice", "Maize"],
-    "Kymore Plateau and Satpura Hill": ["Wheat", "Rice", "Gram"],
+    "Chhattisgarh Plains": ["Paddy", "Wheat"],
+    "Northern Hill Region of Chhattisgarh": ["Paddy", "Maize"],
+    "Kymore Plateau & Satpura Hills": ["Wheat", "Paddy", "Gram"],
     "Central Narmada Valley": ["Wheat", "Soybean", "Gram"],
-    "Vindhya Plateau": ["Wheat", "Soybean", "Gram"],
-    "Gird Region": ["Wheat", "Mustard", "Pearl Millet"],
-    "Bundelkhand Region": ["Wheat", "Sorghum", "Gram"],
-    "Satpura Plateau": ["Wheat", "Sorghum", "Cotton"],
+    "Vindhyan Plateau": ["Wheat", "Soybean", "Gram"],
+    "Chambal Valley": ["Wheat", "Mustard", "Coarse Millets"],
+    "Bundelkhand": ["Wheat", "Sorghum", "Gram"],
+    "Satpura Highlands": ["Wheat", "Sorghum", "Cotton"],
     "Malwa Plateau": ["Soybean", "Wheat", "Cotton"],
-    "Nimar Valley": ["Cotton", "Sorghum", "Wheat"],
+    "Nimar Plains": ["Cotton", "Sorghum", "Wheat"],
     "Jhabua Hills": ["Maize", "Black Gram", "Cotton"]
 };
 
-// Generate a flattened array of all unique crops mathematically
-const allAvailableCrops = Array.from(new Set(Object.values(agroZones).flat())).sort();
+// Use the exact trained array so the UI chip-selector natively offers everything the ML can predict
+const allAvailableCrops = [
+    "Black Gram", "Coarse Millets", "Cotton", "Flaxseed", "Gram", 
+    "Jowar", "Kodo-Kutki", "Lentil", "Maize", "Mustard", 
+    "Niger", "Paddy", "Sorghum", "Soybean", "Sugarcane", "Wheat"
+].sort();
 
 // Make available globally for vanilla JS access
 window.agroZones = agroZones;

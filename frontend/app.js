@@ -4,14 +4,175 @@
 const API_BASE = "http://localhost:5005";
 
 // ══════════════════════════════════════════════
-// GLOBAL USER STATE
+// GLOBAL UI STATE (AppState) & DATABASE SYNC
 // ══════════════════════════════════════════════
-window.userState = {
-  name: "Advik",
-  location: "Kothri Kalan, Madhya Pradesh",
-  zone: "Central India",
-  activeCrops: ["Soybean", "Wheat"]
+window.AppState = {
+  phone: "",
+  name: "Farmer",
+  zone: "Malwa Plateau",
+  crop: "Wheat",
+  n: "",
+  p: "",
+  k: ""
 };
+
+window.syncUI = function() {
+    // 1. Profile Setup Form
+    if (document.getElementById("profile-phone")) {
+        document.getElementById("profile-phone").value = window.AppState.phone || "";
+        document.getElementById("profile-name").value = window.AppState.name || "";
+        document.getElementById("profile-n").value = window.AppState.n || "";
+        document.getElementById("profile-p").value = window.AppState.p || "";
+        document.getElementById("profile-k").value = window.AppState.k || "";
+        
+        const pZone = document.getElementById("profile-zone");
+        const pCrop = document.getElementById("profile-crop");
+        pZone.innerHTML = `<option value="">Select Zone</option>` + 
+            Object.keys(window.agroZones).map(z => `<option value="${z}">${z}</option>`).join("");
+            
+        if (window.AppState.zone) {
+            pZone.value = window.AppState.zone;
+            pCrop.innerHTML = `<option value="">Select Crop</option>` + 
+                window.agroZones[window.AppState.zone].map(c => `<option value="${c}">${c}</option>`).join("");
+            if(window.AppState.crop) pCrop.value = window.AppState.crop;
+        } else {
+            pCrop.innerHTML = `<option value="">Select Crop</option>`;
+        }
+    }
+    
+    // 2. Risk Forecasting
+    const rZone = document.getElementById("risk_zone");
+    const rCrop = document.getElementById("risk_crop");
+    if (rZone && rCrop && window.AppState.zone) {
+        rZone.innerHTML = `<option value="">Select Zone</option>` + 
+            Object.keys(window.agroZones).map(z => `<option value="${z}">${z}</option>`).join("");
+        rZone.value = window.AppState.zone;
+        rCrop.innerHTML = `<option value="">Select Crop</option>` + 
+            window.agroZones[window.AppState.zone].map(c => `<option value="${c}">${c}</option>`).join("") +
+            `<option value="Other">Other</option>`;
+        if (window.AppState.crop) rCrop.value = window.AppState.crop;
+    }
+
+    // 3. Soil Health Engine
+    if (document.getElementById("in-n")) document.getElementById("in-n").value = window.AppState.n || "";
+    if (document.getElementById("in-p")) document.getElementById("in-p").value = window.AppState.p || "";
+    if (document.getElementById("in-k")) document.getElementById("in-k").value = window.AppState.k || "";
+
+    // 4. Greeting string
+    const greeting = document.getElementById("greeting-name");
+    if(greeting) greeting.innerText = window.AppState.name ? `Farmer Profile Sync — ${window.AppState.name}` : `Farmer Profile Sync`;
+}
+
+// ══════════════════════════════════════════════
+// SQL PROFILE LOAD / SAVE DRIVERS
+// ══════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btn-load-profile")?.addEventListener("click", async () => {
+        const phone = document.getElementById("profile-phone").value;
+        if(!phone) { window.showToast("Please enter a registered phone number.", "error"); return; }
+        
+        try {
+            const btn = document.getElementById("btn-load-profile");
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner border-t-white w-4 h-4 rounded-full border-2 border-primary/20 animate-spin"></div><span>Loading...</span>';
+            btn.disabled = true;
+
+            const res = await fetch(`${API_BASE}/load_profile`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({phone})
+            });
+            
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+
+            if(!res.ok) throw new Error("Profile not found in Cloud Database.");
+            const data = await res.json();
+            
+            window.AppState.phone = data.phone;
+            window.AppState.name = data.name;
+            window.AppState.zone = data.default_zone;
+            window.AppState.crop = data.default_crop;
+            window.AppState.n = data.last_n;
+            window.AppState.p = data.last_p;
+            window.AppState.k = data.last_k;
+            
+            window.syncUI();
+            window.showToast(`Welcome back, ${data.name || 'Farmer'}! UI Synthesised.`, "success");
+        } catch(err) {
+            window.showToast(err.message, "error");
+        }
+    });
+
+    document.getElementById("btn-save-profile")?.addEventListener("click", async () => {
+        const phone = document.getElementById("profile-phone").value;
+        if(!phone) { window.showToast("Phone number is required to save to DB.", "error"); return; }
+        
+        const payload = {
+            phone: phone,
+            name: document.getElementById("profile-name").value,
+            default_zone: document.getElementById("profile-zone").value,
+            default_crop: document.getElementById("profile-crop").value,
+            last_n: document.getElementById("profile-n").value || null,
+            last_p: document.getElementById("profile-p").value || null,
+            last_k: document.getElementById("profile-k").value || null
+        };
+        
+        try {
+            const btn = document.getElementById("btn-save-profile");
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner border-t-white w-4 h-4 rounded-full border-2 border-primary/20 animate-spin"></div><span>Saving...</span>';
+            btn.disabled = true;
+            
+            const res = await fetch(`${API_BASE}/save_profile`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(payload)
+            });
+            
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            
+            if(!res.ok) throw new Error("Database rejection. Could not save.");
+            
+            Object.assign(window.AppState, payload);
+            window.syncUI();
+            window.showToast("Profile deeply persisted to SQLite Database.", "success");
+        } catch(err) {
+            window.showToast(err.message, "error");
+        }
+    });
+
+    document.getElementById("profile-zone")?.addEventListener("change", (e) => {
+        const zone = e.target.value;
+        const pCrop = document.getElementById("profile-crop");
+        if (zone && window.agroZones[zone]) {
+            pCrop.innerHTML = `<option value="">Select Crop</option>` + 
+                window.agroZones[zone].map(c => `<option value="${c}">${c}</option>`).join("");
+        } else {
+            pCrop.innerHTML = `<option value="">Select Crop</option>`;
+        }
+    });
+
+    document.getElementById("risk_zone")?.addEventListener("change", (e) => {
+         window.AppState.zone = e.target.value;
+         const rCrop = document.getElementById("risk_crop");
+         if (e.target.value && window.agroZones[e.target.value]) {
+             rCrop.innerHTML = `<option value="">Select Crop</option>` + 
+                 window.agroZones[e.target.value].map(c => `<option value="${c}">${c}</option>`).join("") +
+                 `<option value="Other">Other</option>`;
+         } else {
+             rCrop.innerHTML = `<option value="">Select Crop</option>`;
+         }
+    });
+    
+    document.getElementById("risk_crop")?.addEventListener("change", (e) => {
+         window.AppState.crop = e.target.value.replace(" (Other)", "");
+    });
+    
+    // Initial Render
+    window.syncUI();
+});
 
 // ══════════════════════════════════════════════
 // 1. RISK FORECASTING
@@ -26,26 +187,28 @@ async function calculateRisk() {
   const temp = parseFloat(document.getElementById("risk_temp").value);
   const humidity = parseFloat(document.getElementById("risk_hum").value);
   const rainfall = parseFloat(document.getElementById("risk_rain").value);
+  const zoneVal = document.getElementById("risk_zone").value;
+  const cropVal = document.getElementById("risk_crop").value.replace(" (Other)", "");
 
-  if (isNaN(temp) || isNaN(humidity) || isNaN(rainfall)) {
-    alert("Please enter values for Temperature, Humidity, and Rainfall.");
+  if (isNaN(temp) || isNaN(humidity) || isNaN(rainfall) || !zoneVal || !cropVal) {
+    alert("Please enter all required fields for Machine Learning evaluation.");
     return;
   }
 
   const originalContent = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner border-t-white"></div> CALCULATING...';
+  btn.innerHTML = '<div class="spinner border-t-white"></div> EVALUATING ML MODEL...';
 
   try {
     const res = await fetch(`${API_BASE}/predict_risk`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        avg_temp_celsius: temp, 
-        avg_humidity_percent: humidity, 
-        avg_rainfall_mm: rainfall,
-        zone: window.userState.zone || "Central India",
-        active_crops: window.userState.activeCrops || []
+        temp_14d: temp, 
+        humid_14d: humidity, 
+        rain_14d: rainfall,
+        zone: zoneVal,
+        crop: cropVal
       }),
     });
 
@@ -57,58 +220,19 @@ async function calculateRisk() {
     const data = await res.json();
     resultDiv.classList.remove("hidden");
 
-    const prob = data.risk_percentage ?? data.probability ?? data.risk ?? 0;
-    const severity = data.severity_level ?? "Unknown Risk";
-    const rec = data.recommendation ? `<br><span class="text-sm font-medium mt-1 block opacity-90">${data.recommendation}</span>` : "";
+    const prob = data.probability ?? 0;
     
-    // Regional Crops Evaluation Block
-    const regionalCrops = data.regional_crops || [];
-    let cropsHtml = `<div class="mt-4 mb-2 p-4 bg-surface-container-low rounded-xl border border-outline-variant">
-        <span class="text-sm font-bold text-secondary uppercase tracking-wide block mb-2">Viable Crops for ${window.userState.zone}</span>
-        <div class="flex flex-wrap gap-2">
-            ${regionalCrops.map(c => `<span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded font-bold text-xs">${c}</span>`).join("")}
-        </div>
-    </div>`;
-
-    let alertHtml = "";
-    if (data.alerts && data.alerts.length > 0) {
-        data.alerts.forEach(a => {
-            alertHtml += `<div class="mt-2 p-4 bg-error-container text-error rounded-xl text-sm font-bold border border-error">
-                Warning: Conditions are optimal for ${a.disease} in regional ${a.crop} fields.<br>
-                <span class="font-normal opacity-90 block mt-1">Treatment: ${a.treatment}</span>
-            </div>`;
-        });
-        
-        const pestContainer = document.getElementById("pest-alerts-container");
-        if (pestContainer) {
-            pestContainer.innerHTML = data.alerts.map(a => `
-                <div class="bg-error-container p-6 rounded-2xl mb-4 border border-error">
-                    <h4 class="text-xl font-black text-error mb-2">Regional Risk: ${a.disease} (${a.crop})</h4>
-                    <p class="text-on-error-container font-medium">${a.treatment}</p>
-                </div>
-            `).join("");
-        }
+    // UI update for Alert Banner CSS based on backend status Traffic Light design
+    if (data.alert_level === "danger") {
+        resultDiv.className = "mt-6 p-6 rounded-2xl flex items-center gap-4 transition-all bg-error-container text-error border-2 border-error";
+        riskIndicator.className = 'min-w-[48px] h-12 rounded-full flex items-center justify-center bg-error text-white shadow-lg';
+        riskIcon.innerText = "warning";
+        riskText.innerHTML = `<span class="uppercase tracking-widest text-xs font-bold opacity-80">HIGH RISK - ${prob}%</span><br><span class="text-sm font-medium block mt-1">${data.message}</span>`;
     } else {
-        const pestContainer = document.getElementById("pest-alerts-container");
-        if (pestContainer) {
-            pestContainer.innerHTML = `<p class="text-secondary font-medium">No urgent weather-driven disease alerts detected.</p>`;
-        }
-    }
-
-    riskText.innerHTML = `${severity} Risk - ${prob}%${rec}${cropsHtml}${alertHtml}`;
-
-    if (severity === "High" || prob > 75) {
-      riskIndicator.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-error text-white';
-      riskIcon.innerText = "warning";
-      riskText.className = "text-xl font-black text-error";
-    } else if (severity === "Moderate" || (prob >= 40 && prob <= 75)) {
-      riskIndicator.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-orange-500 text-white';
-      riskIcon.innerText = "warning";
-      riskText.className = "text-xl font-black text-orange-600";
-    } else {
-      riskIndicator.className = 'w-12 h-12 rounded-full flex items-center justify-center bg-green-500 text-white';
-      riskIcon.innerText = "check_circle";
-      riskText.className = "text-xl font-black text-green-600";
+        resultDiv.className = "mt-6 p-6 rounded-2xl flex items-center gap-4 transition-all bg-[#e4ffd9] text-[#173418] border-2 border-[#173418]/20";
+        riskIndicator.className = 'min-w-[48px] h-12 rounded-full flex items-center justify-center bg-[#173418] text-[#e4ffd9] shadow-lg';
+        riskIcon.innerText = "check_circle";
+        riskText.innerHTML = `<span class="uppercase tracking-widest text-xs font-bold opacity-80">LOW RISK - ${prob}%</span><br><span class="text-sm font-medium block mt-1">${data.message}</span>`;
     }
 
   } catch (err) {
@@ -309,23 +433,6 @@ async function calculateFertilizer() {
 // 4. SPA ROUTING & INITIALIZATION
 // ══════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Hydrate User State
-    const greeting = document.getElementById("greeting-name");
-    if (greeting) greeting.innerText = `Hello, ${window.userState.name}`;
-
-    const profileName = document.getElementById("profile-name");
-    const profileLocation = document.getElementById("profile-location");
-    const profileZone = document.getElementById("profile-zone");
-    const profileCrops = document.getElementById("profile-crops");
-
-    if (profileName) profileName.innerText = window.userState.name;
-    if (profileLocation) profileLocation.innerText = window.userState.location;
-    if (profileZone) profileZone.innerText = window.userState.zone;
-    if (profileCrops) {
-        profileCrops.innerHTML = window.userState.activeCrops.map(
-            crop => `<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-sm font-bold shadow-sm">${crop}</span>`
-        ).join("");
-    }
 
     // 2. Setup Routing
     const navLinks = document.querySelectorAll('.nav-link');
@@ -396,6 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // 6. DASHBOARD INTERACTIVITY ENGINE
 // ══════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+    // Legacy Crop Dropdown binding has been deprecated globally.
+
     // 1. Populate Edit Profile Zone Select dynamically from config
     const editZoneSelect = document.getElementById("edit-zone");
     if (editZoneSelect && window.agroZones) {
@@ -436,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             actionInput.classList.add("hidden");
             actionSelectContainer.classList.remove("hidden");
             
-            const userZone = window.userState.zone || "Central India";
+            const userZone = window.AppState.zone || "Malwa Plateau";
             if (actionZoneText) actionZoneText.innerText = userZone;
             
             const recommended = window.agroZones[userZone] || [];
@@ -594,61 +703,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ══════════════════════════════════════════════
-// 5. PROFILE MANAGEMENT (Modals)
-// ══════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-    const editBtn = document.getElementById("edit-profile-btn");
-    const modal = document.getElementById("edit-profile-modal");
-    const cancelBtn = document.getElementById("cancel-edit-btn");
-    const saveBtn = document.getElementById("save-edit-btn");
-
-    if (editBtn && modal) {
-        // Open Modal and Read Current State into Inputs
-        editBtn.addEventListener("click", () => {
-            document.getElementById("edit-name").value = window.userState.name;
-            document.getElementById("edit-location").value = window.userState.location;
-            document.getElementById("edit-zone").value = window.userState.zone;
-            document.getElementById("edit-crops").value = window.userState.activeCrops.join(", ");
-            
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-        });
-
-        // Close form (cancel)
-        cancelBtn.addEventListener("click", () => {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        });
-
-        // Save Form (write to state and hydrate DOM)
-        saveBtn.addEventListener("click", () => {
-            window.userState.name = document.getElementById("edit-name").value;
-            window.userState.location = document.getElementById("edit-location").value;
-            window.userState.zone = document.getElementById("edit-zone").value;
-            const newCrops = document.getElementById("edit-crops").value.split(",").map(c => c.trim()).filter(c => c);
-            if(newCrops.length > 0) window.userState.activeCrops = newCrops;
-
-            // Re-render UI Elements reflecting the new State instantly
-            const greeting = document.getElementById("greeting-name");
-            if (greeting) greeting.innerText = `Hello, ${window.userState.name}`;
-
-            const profileName = document.getElementById("profile-name");
-            const profileLocation = document.getElementById("profile-location");
-            const profileZone = document.getElementById("profile-zone");
-            const profileCrops = document.getElementById("profile-crops");
-
-            if (profileName) profileName.innerText = window.userState.name;
-            if (profileLocation) profileLocation.innerText = window.userState.location;
-            if (profileZone) profileZone.innerText = window.userState.zone;
-            if (profileCrops) {
-                profileCrops.innerHTML = window.userState.activeCrops.map(
-                    crop => `<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-sm font-bold shadow-sm">${crop}</span>`
-                ).join("");
-            }
-
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        });
-    }
-});
+// Extraneous bindings removed.

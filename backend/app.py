@@ -6,11 +6,30 @@ Agricultural Decision Support System
 import os
 import uuid
 import sqlite3
+import joblib
+import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+
+# Load Machine Learning Model parameters
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'zone_disease_risk_model.pkl')
+ENCODERS_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'label_encoders.pkl')
+
+rf_model = None
+label_encoders = {}
+
+try:
+    if os.path.exists(MODEL_PATH) and os.path.exists(ENCODERS_PATH):
+        rf_model = joblib.load(MODEL_PATH)
+        label_encoders = joblib.load(ENCODERS_PATH)
+        app.logger.info("Successfully loaded Random Forest model and encoders.")
+    else:
+        app.logger.warning("ML Model files not found. Predict route may fail.")
+except Exception as e:
+    app.logger.error(f"Error loading ML models: {e}")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'narmada_yield.db')
 
@@ -18,6 +37,40 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Farmers (
+            phone TEXT PRIMARY KEY
+        )
+    ''')
+    
+    columns_to_add = {
+        'name': 'TEXT',
+        'default_zone': 'TEXT',
+        'default_crop': 'TEXT',
+        'last_n': 'REAL',
+        'last_p': 'REAL',
+        'last_k': 'REAL'
+    }
+    
+    cursor.execute("PRAGMA table_info(Farmers)")
+    existing_columns = [col['name'] for col in cursor.fetchall()]
+    
+    for col_name, col_type in columns_to_add.items():
+        if col_name not in existing_columns:
+            try:
+                cursor.execute(f"ALTER TABLE Farmers ADD COLUMN {col_name} {col_type}")
+            except Exception as e:
+                app.logger.error(f"Failed to add column {col_name}: {e}")
+                
+    conn.commit()
+    conn.close()
+
+with app.app_context():
+    init_db()
 
 def generate_advice(temp, humidity, crop=""):
     """Deterministic logic engine"""
@@ -57,6 +110,71 @@ def register():
         app.logger.error(f"/register error: {e}")
         return jsonify({"error": "Internal server error.", "details": str(e)}), 500
 
+# ---------------------------------------------------------------------------
+# Route: POST /load_profile
+# ---------------------------------------------------------------------------
+@app.route('/load_profile', methods=['POST'])
+def load_profile():
+    data = request.get_json(force=True, silent=True)
+    if not data or 'phone' not in data:
+        return jsonify({"error": "Missing phone number"}), 400
+        
+    phone = str(data['phone']).strip()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Farmers WHERE phone = ?", (phone,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row:
+        return jsonify(dict(row)), 200
+    else:
+        return jsonify({"error": "Profile not found"}), 404
+
+# ---------------------------------------------------------------------------
+# Route: POST /save_profile
+# ---------------------------------------------------------------------------
+@app.route('/save_profile', methods=['POST'])
+def save_profile():
+    data = request.get_json(force=True, silent=True)
+    if not data or 'phone' not in data:
+        return jsonify({"error": "Missing phone number"}), 400
+        
+    phone = str(data['phone']).strip()
+    name = data.get('name', '')
+    default_zone = data.get('default_zone', '')
+    default_crop = data.get('default_crop', '')
+    
+    try: last_n = float(data.get('last_n')) if data.get('last_n') is not None else None
+    except ValueError: last_n = None
+    try: last_p = float(data.get('last_p')) if data.get('last_p') is not None else None
+    except ValueError: last_p = None
+    try: last_k = float(data.get('last_k')) if data.get('last_k') is not None else None
+    except ValueError: last_k = None
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT phone FROM Farmers WHERE phone = ?", (phone,))
+        if cursor.fetchone():
+            cursor.execute("""
+                UPDATE Farmers 
+                SET name=?, default_zone=?, default_crop=?, last_n=?, last_p=?, last_k=?
+                WHERE phone=?
+            """, (name, default_zone, default_crop, last_n, last_p, last_k, phone))
+        else:
+            cursor.execute("""
+                INSERT INTO Farmers (phone, name, default_zone, default_crop, last_n, last_p, last_k)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (phone, name, default_zone, default_crop, last_n, last_p, last_k))
+        conn.commit()
+        return jsonify({"message": "Profile saved successfully."}), 200
+    except Exception as e:
+        app.logger.error(f"/save_profile error: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
 
 # Directory to temporarily store uploaded images
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'temp_uploads')
@@ -77,176 +195,60 @@ def allowed_file(filename: str) -> bool:
 # ---------------------------------------------------------------------------
 @app.route('/predict_risk', methods=['POST'])
 def predict_risk():
-    """
-    Expected JSON payload:
-    {
-        "avg_temp_celsius": 28.5,
-        "avg_humidity_percent": 72.0,
-        "avg_rainfall_mm": 18.4
-    }
-    """
     try:
         data = request.get_json(force=True, silent=True)
         if data is None:
             return jsonify({"error": "Invalid or missing JSON payload."}), 400
 
-        # Basic validation
-        required_fields = ['avg_temp_celsius', 'avg_humidity_percent', 'avg_rainfall_mm']
+        required_fields = ['zone', 'crop', 'temp_14d', 'humid_14d', 'rain_14d']
         missing = [f for f in required_fields if f not in data]
         if missing:
             return jsonify({"error": f"Missing required fields: {', '.join(missing)}"}), 400
 
-        CROP_DISEASE_RULES = {
-            "Soybean": {
-                "diseases": [
-                    {
-                        "name": "Soybean Rust",
-                        "risk_factors": {"temp_min": 15, "temp_max": 28, "humidity_threshold": 80, "rainfall_required_mm": 5},
-                        "treatment": "Apply Triazole or Strobilurin-based fungicides immediately."
-                    },
-                    {
-                        "name": "Charcoal Rot",
-                        "risk_factors": {"temp_min": 28, "temp_max": 35, "humidity_threshold": 50, "notes": "Triggered by dry, hot conditions rather than high moisture."},
-                        "treatment": "Increase irrigation frequency; apply organic mulching."
-                    }
-                ]
-            },
-            "Wheat": {
-                "diseases": [
-                    {
-                        "name": "Leaf Rust",
-                        "risk_factors": {"temp_min": 15, "temp_max": 22, "humidity_threshold": 75, "rainfall_required_mm": 2},
-                        "treatment": "Apply Propiconazole or Tebuconazole at first sign of pustules."
-                    },
-                    {
-                        "name": "Karnal Bunt",
-                        "risk_factors": {"temp_min": 18, "temp_max": 22, "humidity_threshold": 70, "notes": "Highly critical during the heading/flowering stage."},
-                        "treatment": "Preventative fungicidal spray during ear emergence."
-                    }
-                ]
-            },
-            "Paddy": {
-                "diseases": [
-                    {
-                        "name": "Bacterial Blight",
-                        "risk_factors": {"temp_min": 25, "temp_max": 34, "humidity_threshold": 70, "rainfall_required_mm": 5},
-                        "treatment": "Use copper-based bactericides; ensure proper field drainage."
-                    }
-                ]
-            },
-            "Cotton": {
-                "diseases": [
-                    {
-                        "name": "Boll Rot",
-                        "risk_factors": {"temp_min": 27, "temp_max": 32, "humidity_threshold": 85, "rainfall_required_mm": 5},
-                        "treatment": "Improve canopy airflow; apply preventative fungicide."
-                    }
-                ]
+        if rf_model is None or not label_encoders:
+            return jsonify({"error": "ML model not initialized. Check ML pickle files."}), 503
+
+        zone_str = str(data['zone']).strip()
+        crop_str = str(data['crop']).strip()
+        
+        try:
+            zone_encoder = label_encoders.get('Zone')
+            crop_encoder = label_encoders.get('Crop')
+            if not zone_encoder or not crop_encoder:
+                raise ValueError("Encoders missing from memory.")
+                
+            zone_encoded = zone_encoder.transform([zone_str])[0]
+            crop_encoded = crop_encoder.transform([crop_str])[0]
+        except Exception as e:
+             return jsonify({"error": f"Encoding error for inputs (Zone: {zone_str}, Crop: {crop_str}): {str(e)}"}), 400
+
+        temp = float(data['temp_14d'])
+        humid = float(data['humid_14d'])
+        rain = float(data['rain_14d'])
+        
+        # Assumed feature order for sklearn rf
+        features = np.array([[zone_encoded, crop_encoded, temp, humid, rain]])
+        
+        prediction = rf_model.predict(features)[0]
+        probabilities = rf_model.predict_proba(features)[0]
+        
+        prob_pct = round(max(probabilities) * 100, 2)
+        
+        if prediction == 1:
+            response = {
+                "status": "success",
+                "alert_level": "danger",
+                "probability": prob_pct,
+                "message": f"High Biological Risk for {crop_str} in {zone_str}. Preventative application necessary."
             }
-        }
-
-        # Determine Regional Scope
-        zone = data.get("zone", "Central India")
-        REGION_CROPS = {
-            "Central India": ["Soybean", "Wheat", "Paddy", "Cotton", "Gram", "Mustard"],
-            "Northern India": ["Wheat", "Mustard", "Sugarcane", "Paddy"],
-            "Southern India": ["Paddy", "Cotton", "Sugarcane", "Groundnut"]
-        }
-        regional_crops = REGION_CROPS.get(zone, ["Soybean", "Wheat"])
-        active_crops = data.get("active_crops", [])
-        
-        crops_to_evaluate = list(set(regional_crops).union(set(active_crops) if isinstance(active_crops, list) else set()))
-
-        temp = float(data['avg_temp_celsius'])
-        humidity = float(data['avg_humidity_percent'])
-        rainfall = float(data['avg_rainfall_mm'])
-
-        base_score = 0
-        
-        # Humidity Factor
-        if humidity > 85:
-            base_score += 50
-        elif 70 <= humidity <= 85:
-            base_score += 25
-            
-        # Temperature Factor
-        if 20 <= temp <= 28:
-            base_score += 30
-        elif (15 <= temp <= 19) or (29 <= temp <= 32):
-            base_score += 15
-            
-        # Rainfall Factor
-        if rainfall > 5:
-            base_score += 20
-            
-        total_risk_score = base_score
-        
-        if total_risk_score > 75:
-            severity_level = 'High'
-            recommendation = 'Preventative fungicide application recommended.'
-        elif total_risk_score >= 40:
-            severity_level = 'Moderate'
-            recommendation = 'Monitor closely.'
         else:
-            severity_level = 'Low'
-            recommendation = 'Optimal conditions.'
-
-        # Cross-reference with Crop JSON logic dynamically scoped to the region and user structure
-        alerts = []
-        if isinstance(crops_to_evaluate, list):
-            for crop in crops_to_evaluate:
-                if not isinstance(crop, str): continue
-                if crop in CROP_DISEASE_RULES:
-                    for disease in CROP_DISEASE_RULES[crop].get("diseases", []):
-                        if not isinstance(disease, dict): continue
-                        
-                        rules = disease.get("risk_factors", {})
-                        if not isinstance(rules, dict): continue
-                        
-                        try:
-                            t_min = float(rules.get("temp_min", -99))
-                            t_max = float(rules.get("temp_max", 99))
-                        except (TypeError, ValueError):
-                            continue
-                        
-                        if not (t_min <= temp <= t_max): continue
-                        
-                        try:
-                            h_thresh = float(rules.get("humidity_threshold", 0))
-                        except (TypeError, ValueError):
-                            continue
-                            
-                        is_charcoal = (disease.get("name") == "Charcoal Rot")
-                        
-                        if is_charcoal:
-                            if humidity > h_thresh: continue # Charcoal Rot thrives in DRY heat
-                        else:
-                            if humidity < h_thresh: continue # Others thrive in HIGH humidity
-                            
-                        try:
-                            r_req = float(rules.get("rainfall_required_mm", 0))
-                        except (TypeError, ValueError):
-                            continue
-                            
-                        if rainfall < r_req: continue
-                        
-                        alerts.append({
-                            "crop": crop,
-                            "disease": str(disease.get("name", "Unknown")),
-                            "treatment": str(disease.get("treatment", ""))
-                        })
-        
-        if alerts:
-            severity_level = 'High'
-            if total_risk_score < 76: total_risk_score = 85 # Elevate risk score logically
-
-        response = {
-            "risk_percentage": total_risk_score,
-            "severity_level": severity_level,
-            "recommendation": recommendation,
-            "regional_crops": regional_crops,
-            "alerts": alerts
-        }
+            response = {
+                "status": "success",
+                "alert_level": "success",
+                "probability": prob_pct,
+                "message": "Low Risk. Weather stable."
+            }
+            
         return jsonify(response), 200
 
     except Exception as e:
