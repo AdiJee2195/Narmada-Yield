@@ -59,6 +59,10 @@ The server will start on `http://localhost:5005`.
 ### 2. Frontend Setup
 Open `frontend/index.html` in any modern web browser. Ensure the `API_BASE` in `app.js` matches your backend URL.
 
+### 3. Alternate Setup
+*Directly clone the directory into your local device and run the batch file. 
+* Then go to your browser and put in http://localhost:8085 to access the web-app
+
 ---
 
 ## 📂 Project Structure
